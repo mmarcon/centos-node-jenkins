@@ -1,0 +1,8 @@
+---
+
+- name: setup yum
+  sudo: yes
+  shell: curl https://rpm.nodesource.com/setup | bash
+
+- name: install nodejs
+  yum: name=nodejs state=latest

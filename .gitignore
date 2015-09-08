@@ -1,0 +1,4 @@
+.vagrant
+
+jobs/*.xml
+!jobs/*.example.xml

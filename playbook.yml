@@ -1,0 +1,40 @@
+---
+- hosts: all
+  gather_facts: no
+  sudo: yes
+  vars:
+    ansible_os_family: RedHat
+    jenkins_hostname: localhost
+    jenkins_plugins:
+      - git
+      - build-monitor-plugin
+      - ansicolor
+
+    jenkins_jobs:
+
+    firewall_allowed_tcp_ports:
+      - "22"
+      - "8080"
+
+    # nodejs
+    nodejs_packages:
+      - grunt-cli
+
+  roles:
+    - nodejs
+    - geerlingguy.jenkins
+    - geerlingguy.firewall
+
+  pre_tasks:
+    - name: install curl
+      yum: name=curl state=latest
+
+  tasks:
+    - name: fetch jenkins cli
+      shell: curl http://{{ jenkins_hostname }}:8080/jnlpJars/jenkins-cli.jar -o /root/jenkins-cli.jar
+    - name: copy jobs
+      copy: src=./jobs/{{ item }}.xml dest=/root
+      with_items: jenkins_jobs
+    - name: install jobs
+      shell: java -jar /root/jenkins-cli.jar -s http://{{ jenkins_hostname }}:8080 create-job {{ item }} < /root/{{ item }}.xml
+      with_items: jenkins_jobs
